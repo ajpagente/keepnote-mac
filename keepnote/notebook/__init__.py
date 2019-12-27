@@ -29,8 +29,8 @@ import mimetypes
 import os
 import sys
 import re
-import urlparse
-import urllib2
+import urllib.parse
+# import urllib2
 import uuid
 import xml.etree.cElementTree as ET
 
@@ -240,9 +240,9 @@ def get_notebook_version(filename):
 
     try:
         tree = ET.ElementTree(file=filename)
-    except IOError, e:
+    except IOError as e:
         raise NoteBookError(_("Cannot read notebook preferences"), e)
-    except Exception, e:
+    except Exception as e:
         raise NoteBookError(_("Notebook preference data is corrupt"), e)
 
     return get_notebook_version_etree(tree)
@@ -343,7 +343,7 @@ def attach_file(filename, node, index=None):
         child.save(True)
         return child
 
-    except Exception, e:
+    except Exception as e:
         # remove child
         keepnote.log_error(e)
         if child:
@@ -354,7 +354,7 @@ def attach_file(filename, node, index=None):
 #=============================================================================
 # errors
 
-class NoteBookError (StandardError):
+class NoteBookError (Exception):
     """Exception that occurs when manipulating NoteBook's"""
 
     def __init__(self, msg, error=None):
@@ -472,7 +472,7 @@ g_default_attr_defs = [
     AttrDef(
         "content_type", "string", "Content type", default=CONTENT_TYPE_DIR),
     AttrDef("title", "string", "Title"),
-    AttrDef("order", "integer", "Order", default=sys.maxint),
+    AttrDef("order", "integer", "Order", default=sys.maxsize),
     AttrDef("created_time", "timestamp", "Created time"),
     AttrDef("modified_time", "timestamp", "Modified time"),
     AttrDef("expanded", "bool", "Expaned", default=True),
@@ -693,7 +693,7 @@ class NoteBookNode (object):
                     out.write(data)
                 infile.close()
                 out.close()
-        except Exception, e:
+        except Exception as e:
             raise NoteBookError(_("Cannot copy file '%s'" % filename), e)
 
         # set attr
@@ -1471,7 +1471,7 @@ class NoteBook (NoteBookNode):
                                             {"title": TRASH_NAME})
                 self._add_child(self._trash)
 
-            except NoteBookError, e:
+            except NoteBookError as e:
                 raise NoteBookError(_("Cannot create Trash folder"), e)
 
     def is_trash_dir(self, node):
@@ -1695,9 +1695,9 @@ class NoteBook (NoteBookNode):
                       u'</notebook>\n')
             out.close()
 
-        except (IOError, OSError), e:
+        except (IOError, OSError) as e:
             raise NoteBookError(_("Cannot save notebook preferences"), e)
-        except Exception, e:
+        except Exception as e:
             raise NoteBookError(_("File format error"), e)
 
     def read_preferences(self, infile=None):
@@ -1707,10 +1707,10 @@ class NoteBook (NoteBookNode):
                 infile = self.open_file(PREF_FILE, "r", codec="utf-8")
             root = ET.fromstring(infile.read())
             tree = ET.ElementTree(root)
-        except IOError, e:
+        except IOError as e:
             raise NoteBookError(_("Cannot read notebook preferences %s") %
                                 self.get_file(PREF_FILE), e)
-        except Exception, e:
+        except Exception as e:
             keepnote.log_error(e)
             #if recover:
             #    if infile:

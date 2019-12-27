@@ -48,7 +48,7 @@ FS_ENCODING = sys.getfilesystemencoding()
 
 # keepnote imports
 from keepnote import extension
-from keepnote import mswin
+# from keepnote import mswin
 from keepnote import orderdict
 from keepnote import plist
 from keepnote import safefile
@@ -72,10 +72,10 @@ import keepnote.xdg
 # these are imported here, so that py2exe can auto-discover them
 
 import base64
-import htmlentitydefs
+import html.entities
 from keepnote import tarfile
 import random
-import sgmllib
+# import sgmllib
 import string
 import xml.dom.minidom
 import xml.sax.saxutils
@@ -84,9 +84,9 @@ import xml.sax.saxutils
 GETTEXT_DOMAIN
 base64
 get_unique_filename_list
-htmlentitydefs
+# htmlentitydefs
 random
-sgmllib
+# sgmllib
 string
 tarfile
 xml
@@ -136,7 +136,9 @@ TRANSLATOR_CREDITS = (
 )
 
 
-BASEDIR = os.path.dirname(unicode(__file__, FS_ENCODING))
+# [AJ] Support unicode filenames later
+# BASEDIR = os.path.dirname(unicode(__file__, FS_ENCODING))
+BASEDIR = os.path.dirname(__file__)
 PLATFORM = None
 
 USER_PREF_DIR = u"keepnote"
@@ -417,7 +419,7 @@ def init_user_pref_dir(pref_dir=None, home=None):
 
     # make directory
     if not os.path.exists(pref_dir):
-        os.makedirs(pref_dir, 0700)
+        os.makedirs(pref_dir)
 
     # init empty pref file
     pref_file = get_user_pref_file(pref_dir)
@@ -482,7 +484,7 @@ def log_message(message, out=None):
 # Exceptions
 
 
-class EnvError (StandardError):
+class EnvError (Exception):
     """Exception that occurs when environment variables are ill-defined"""
 
     def __init__(self, msg, error=None):
@@ -497,7 +499,7 @@ class EnvError (StandardError):
             return self.msg
 
 
-class KeepNoteError (StandardError):
+class KeepNoteError (Exception):
     def __init__(self, msg, error=None):
         StandardError.__init__(self, msg)
         self.msg = msg
@@ -513,7 +515,7 @@ class KeepNoteError (StandardError):
         return self.msg
 
 
-class KeepNotePreferenceError (StandardError):
+class KeepNotePreferenceError (Exception):
     """Exception that occurs when manipulating preferences"""
 
     def __init__(self, msg, error=None):
@@ -620,7 +622,7 @@ class KeepNotePreferences (Pref):
             try:
                 init_user_pref_dir(self._pref_dir)
                 self.write()
-            except Exception, e:
+            except Exception as e:
                 raise KeepNotePreferenceError(
                     "Cannot initialize preferences", e)
 
@@ -651,7 +653,7 @@ class KeepNotePreferences (Pref):
                 # set data
                 self._data.clear()
                 self._data.update(data)
-        except Exception, e:
+        except Exception as e:
             raise KeepNotePreferenceError("Cannot read preferences", e)
 
         # notify listeners
@@ -675,7 +677,7 @@ class KeepNotePreferences (Pref):
 
             out.close()
 
-        except (IOError, OSError), e:
+        except (IOError, OSError) as e:
             log_error(e, sys.exc_info()[2])
             raise NoteBookError(_("Cannot save preferences"), e)
 
@@ -1049,7 +1051,7 @@ class KeepNote (object):
         # execute command
         try:
             proc = subprocess.Popen(cmd)
-        except OSError, e:
+        except OSError as e:
             raise KeepNoteError(
                 _(u"Error occurred while opening file with %s.\n\n"
                   u"program: '%s'\n\n"
@@ -1177,7 +1179,7 @@ class KeepNote (object):
                     log_message(_("enabling extension '%s'\n") % ext.key)
                     ext.enable(True)
 
-            except extension.DependencyError, e:
+            except extension.DependencyError as e:
                 # could not enable due to failed dependency
                 log_message(_("  skipping extension '%s':\n") % ext.key)
                 for dep in ext.get_depends():
@@ -1185,7 +1187,7 @@ class KeepNote (object):
                         log_message(_("    failed dependency: %s\n") %
                                     repr(dep))
 
-            except Exception, e:
+            except Exception as e:
                 # unknown error
                 log_error(e, sys.exc_info()[2])
 
@@ -1271,7 +1273,7 @@ class KeepNote (object):
         try:
             entry.ext = extension.import_extension(
                 self, entry.get_key(), entry.filename)
-        except KeepNotePreferenceError, e:
+        except KeepNotePreferenceError as e:
             log_error(e, sys.exc_info()[2])
             return None
 
@@ -1335,7 +1337,7 @@ class KeepNote (object):
             new_names = set(self._extensions.keys()) - exts
             new_exts = [self.get_extension(name) for name in new_names]
 
-        except Exception, e:
+        except Exception as e:
             self.error(_("Unable to install extension '%s'") % filename,
                        e, tracebk=sys.exc_info()[2])
 

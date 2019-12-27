@@ -25,14 +25,14 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-import urlparse
+import urllib.parse
 
 
 #=============================================================================
 # errors
 
 
-class ConnectionError (StandardError):
+class ConnectionError (Exception):
     def __init__(self, msg="", error=None):
         StandardError.__init__(self, msg)
         self.error = error
