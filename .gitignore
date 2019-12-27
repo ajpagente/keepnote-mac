@@ -1,3 +1,10 @@
+# ignore private files and folders
+*_pr.*
+*_pr
+
+# ignore macOS .DS_store
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
